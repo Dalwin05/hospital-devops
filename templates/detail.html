@@ -1,0 +1,67 @@
+{% extends "base.html" %}
+{% block extra_style %}
+.card { background: white; border-radius: 14px; padding: 2rem;
+        box-shadow: 0 2px 10px rgba(0,0,0,0.08); max-width: 720px; margin: 0 auto; }
+.card-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 1.5rem; }
+.card-header h2 { font-size: 1.4rem; color: #276749; }
+.card-header p  { font-size: 0.85rem; color: #718096; margin-top: 3px; }
+.status-admitted   { background:#bee3f8;color:#2a4365;padding:4px 14px;border-radius:20px;font-weight:700;font-size:0.9rem; }
+.status-discharged { background:#c6f6d5;color:#22543d;padding:4px 14px;border-radius:20px;font-weight:700;font-size:0.9rem; }
+.status-critical   { background:#fed7d7;color:#742a2a;padding:4px 14px;border-radius:20px;font-weight:700;font-size:0.9rem; }
+.info-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1.5rem; }
+.info-item { background: #f7fafc; border-radius: 8px; padding: 0.8rem 1rem; }
+.info-item .label { font-size: 0.75rem; color: #718096; text-transform: uppercase; letter-spacing: 0.05em; }
+.info-item .value { font-size: 1rem; font-weight: 600; color: #1a202c; margin-top: 3px; }
+.fee-box { background: linear-gradient(135deg, #1a4731, #276749); color: white;
+           border-radius: 12px; padding: 1.2rem 1.5rem; text-align: center; margin-top: 1rem; }
+.fee-box .amount { font-size: 2rem; font-weight: 700; }
+.fee-box .label  { font-size: 0.8rem; opacity: 0.8; margin-top: 3px; }
+.back { display: inline-block; margin-bottom: 1rem; color: #276749;
+        text-decoration: none; font-size: 0.9rem; font-weight: 500; }
+.back:hover { text-decoration: underline; }
+{% endblock %}
+
+{% block content %}
+<a class="back" href="/">← Back to Dashboard</a>
+<div class="card">
+  <div class="card-header">
+    <div>
+      <h2>{{ patient.name }}</h2>
+      <p>Patient ID: <strong>{{ patient.id }}</strong></p>
+    </div>
+    <span class="status-{{ patient.status.lower() }}">{{ patient.status }}</span>
+  </div>
+
+  <div class="info-grid">
+    <div class="info-item">
+      <div class="label">Age</div>
+      <div class="value">{{ patient.age }} years</div>
+    </div>
+    <div class="info-item">
+      <div class="label">Gender</div>
+      <div class="value">{{ patient.gender }}</div>
+    </div>
+    <div class="info-item">
+      <div class="label">Ward / Department</div>
+      <div class="value">{{ patient.ward }}</div>
+    </div>
+    <div class="info-item">
+      <div class="label">Attending Doctor</div>
+      <div class="value">{{ patient.doctor }}</div>
+    </div>
+    <div class="info-item">
+      <div class="label">Days Admitted</div>
+      <div class="value">{{ patient.days }} day{{ 's' if patient.days != 1 else '' }}</div>
+    </div>
+    <div class="info-item">
+      <div class="label">Daily Rate</div>
+      <div class="value">₹{{ "{:,}".format((patient.fee // patient.days) if patient.days else patient.fee) }}</div>
+    </div>
+  </div>
+
+  <div class="fee-box">
+    <div class="label">Total Bill Amount</div>
+    <div class="amount">₹{{ "{:,}".format(patient.fee) }}</div>
+  </div>
+</div>
+{% endblock %}

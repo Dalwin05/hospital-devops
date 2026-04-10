@@ -1,0 +1,65 @@
+---
+# Ansible Playbook – Deploy Hospital Management Portal to AKS
+
+- name: Deploy Hospital Management Portal to AKS
+  hosts: localhost
+  connection: local
+  gather_facts: false
+
+  vars:
+    namespace: hospital-portal
+    acr_name: "{{ acr_name | default('hospitalportalacr') }}"
+    image_tag: "{{ image_tag | default('latest') }}"
+    replicas: 2
+
+  tasks:
+    - name: Ensure namespace exists
+      community.kubernetes.k8s:
+        state: present
+        definition:
+          apiVersion: v1
+          kind: Namespace
+          metadata:
+            name: "{{ namespace }}"
+
+    - name: Apply Kubernetes Deployment manifest
+      community.kubernetes.k8s:
+        state: present
+        template: "{{ playbook_dir }}/../k8s/deployment.yml"
+
+    - name: Apply Kubernetes Service manifest
+      community.kubernetes.k8s:
+        state: present
+        src: "{{ playbook_dir }}/../k8s/service.yml"
+
+    - name: Apply Horizontal Pod Autoscaler
+      community.kubernetes.k8s:
+        state: present
+        src: "{{ playbook_dir }}/../k8s/hpa.yml"
+
+    - name: Wait for rollout to complete
+      command: kubectl rollout status deployment/hospital-portal -n {{ namespace }} --timeout=120s
+      register: rollout_result
+
+    - name: Show rollout result
+      debug:
+        msg: "{{ rollout_result.stdout }}"
+
+    - name: Get pod list
+      command: kubectl get pods -n {{ namespace }} -l app=hospital-portal
+      register: pod_list
+
+    - name: Display pods
+      debug:
+        msg: "{{ pod_list.stdout_lines }}"
+
+    - name: Get service external IP
+      command: kubectl get svc hospital-portal-service -n {{ namespace }} -o jsonpath='{.status.loadBalancer.ingress[0].ip}'
+      register: external_ip
+      retries: 10
+      delay: 15
+      until: external_ip.stdout != ""
+
+    - name: Show application URL
+      debug:
+        msg: "Hospital Portal is live at http://{{ external_ip.stdout }}"
