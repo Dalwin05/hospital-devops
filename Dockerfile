@@ -1,12 +1,3 @@
-# ── Stage 1: build deps ─────────────────────────────────────────
-FROM python:3.11-slim AS builder
-
-WORKDIR /install
-COPY requirements.txt .
-RUN pip install --upgrade pip \
- && pip install --prefix=/install/deps --no-cache-dir -r requirements.txt
-
-# ── Stage 2: final image ─────────────────────────────────────────
 FROM python:3.11-slim
 
 LABEL maintainer="your-email@college.edu"
@@ -16,10 +7,11 @@ RUN addgroup --system appgroup && adduser --system --ingroup appgroup appuser
 
 WORKDIR /app
 
-COPY --from=builder /install/deps /usr/local
+COPY requirements.txt .
+RUN pip install --no-cache-dir -r requirements.txt
+
 COPY app/       ./app/
 COPY templates/ ./templates/
-
 
 RUN chown -R appuser:appgroup /app
 USER appuser
