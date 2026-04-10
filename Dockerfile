@@ -19,7 +19,7 @@ WORKDIR /app
 COPY --from=builder /install/deps /usr/local
 COPY app/       ./app/
 COPY templates/ ./templates/
-COPY static/    ./static/
+
 
 RUN chown -R appuser:appgroup /app
 USER appuser
