@@ -95,6 +95,6 @@ jobs:
 
       - name: Verify deployment
         run: |
-          kubectl rollout status deployment/hospital-portal --timeout=120s
-          kubectl get pods -l app=hospital-portal
-          kubectl get svc hospital-portal-service
+          kubectl rollout status deployment/hospital-portal -n hospital-portal --timeout=120s
+          kubectl get pods -n hospital-portal -l app=hospital-portal
+          kubectl get svc -n hospital-portal
